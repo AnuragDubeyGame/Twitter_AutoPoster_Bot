@@ -5,33 +5,41 @@ import random
 import datetime
 import requests
 from dotenv import load_dotenv
+from pymongo import MongoClient
+
 
 
 load_dotenv()
 EmailAdd = os.environ.get("Email")
 PassWord = os.environ.get("Pass")
-DBurl = "https://ap-south-1.aws.data.mongodb-api.com/app/data-uchvr/endpoint/data/v1/action/findOne"
+DBurl = "mongodb+srv://factboyuniverse:factboytestpass@factsdatabasecluster.ej0bjql.mongodb.net/"
+client = MongoClient(DBurl)
+db = client['FactsDB']
+collection = db['factsCollection']
 
 
-def Post():
+
+
+def PostTweet():
     # FETCH FACTS
+    cursor = collection.find()
+    for document in cursor:
+        print(document)
 
-    payload = json.dumps({
-    "collection": "factsCollection",
-    "database": "FactsDB",
-    "dataSource": "FACTSDATABASECLUSTER",
-    "projection": {
-        "_id": 0
-    }})
-    headers = {
-    'Content-Type': 'application/json',
-    'Access-Control-Request-Headers': '*',
-    'api-key': os.environ.get("DBAPI"),
-    }
-    response = requests.request("POST", DBurl, headers=headers, data=payload)
-    print("\t\t RESPONSE : ",response.text)
-
+    PostDataToDB()
     print("\t\t\t !!! Posting a Tweet !!!")
+
+def PostDataToDB():
+   data = {
+        'name': 'John Doe',
+        'age': 30,
+        'email': 'john.doe@example.com'
+    }
+   result = collection.insert_one(data)
+   print('Inserted document ID:', result.inserted_id)
+   client.close()
+
+
 
 def main():
     # Set the start and end time for posting
@@ -57,7 +65,7 @@ def main():
 
         # Generate random post times within the posting time range
         for _ in range(num_posts):
-            Post()
+            PostTweet()
             duration = random.randint(min_duration, max_duration)
             print("\t\t WE WILL WAIT FOR ",duration / 60," MINUTES BEFORE NEXT TWEET!")
             time.sleep(duration)
