@@ -3,14 +3,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+
+ROWS_TO_FETCH = 5500 # Just Enough for 1 years of tweet.
+
+data_dictionary = {}
 driver = webdriver.Chrome()
 website_url = 'https://www.mentalfloss.com/amazingfactgenerator'
-data_dictionary = {}
-
-wait = WebDriverWait(driver, 10)
+wait = WebDriverWait(driver, 1)
 
 def scrape_website(url):
-    driver.get(url)
+    driver.get(url);
 
     text_box = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, '_qsor55')))
     img_element = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="mm-facts-widget-inner"]/article/div/div/figure/div/div')))
@@ -21,9 +23,7 @@ def scrape_website(url):
     img_url = src_item.split('"')[1]
 
     return text_box.text, img_url
-
-N = 0
-for _ in range(N):
+for i in range(ROWS_TO_FETCH):
     scraped_text, scraped_url = scrape_website(website_url)
     data_dictionary[scraped_text] = scraped_url
 
