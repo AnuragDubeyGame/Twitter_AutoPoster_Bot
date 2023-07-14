@@ -1,16 +1,37 @@
 import os
+import json
 import time
 import random
 import datetime
+import requests
 from dotenv import load_dotenv
+
 
 load_dotenv()
 EmailAdd = os.environ.get("Email")
 PassWord = os.environ.get("Pass")
+DBurl = "https://ap-south-1.aws.data.mongodb-api.com/app/data-uchvr/endpoint/data/v1/action/findOne"
 
-# Pick the Data Make a post and then delete that row from the databse. Do this Periodically.
+
 def Post():
-    print("!!! Posting a Tweet !!!")
+    # FETCH FACTS
+
+    payload = json.dumps({
+    "collection": "factsCollection",
+    "database": "FactsDB",
+    "dataSource": "FACTSDATABASECLUSTER",
+    "projection": {
+        "_id": 0
+    }})
+    headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Request-Headers': '*',
+    'api-key': os.environ.get("DBAPI"),
+    }
+    response = requests.request("POST", DBurl, headers=headers, data=payload)
+    print("\t\t RESPONSE : ",response.text)
+
+    print("\t\t\t !!! Posting a Tweet !!!")
 
 def main():
     # Set the start and end time for posting
@@ -18,8 +39,8 @@ def main():
     end_time = datetime.time(23, 59, 0)  # 11:00 PM
 
     # Set the minimum and maximum duration between each post
-    min_duration = 45 * 60 # Minimum duration in mins
-    max_duration = 70 * 60 # Maximum duration in mins
+    min_duration = 1 * 60 # Minimum duration in mins
+    max_duration = 2 * 60 # Maximum duration in mins
 
     # Set the number of times to post in a day
     min_posts = 10  # Minimum number of posts

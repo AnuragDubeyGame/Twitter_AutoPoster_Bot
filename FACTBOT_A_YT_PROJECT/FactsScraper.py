@@ -4,13 +4,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-ROWS_TO_FETCH = 5500 # Just Enough for 1 years of tweet.
 
 data_dictionary = {}
-driver = webdriver.Chrome()
-website_url = 'https://www.mentalfloss.com/amazingfactgenerator'
-wait = WebDriverWait(driver, 1)
+ROWS_TO_FETCH = 5500 # Just Enough for 1 years of tweet.
 
+
+
+driver = webdriver.Chrome()
+wait = WebDriverWait(driver, 1)
+website_url = 'https://www.mentalfloss.com/amazingfactgenerator'
 def scrape_website(url):
     driver.get(url);
 
@@ -26,7 +28,6 @@ def scrape_website(url):
 for i in range(ROWS_TO_FETCH):
     scraped_text, scraped_url = scrape_website(website_url)
     data_dictionary[scraped_text] = scraped_url
-
 driver.quit()
 
 
