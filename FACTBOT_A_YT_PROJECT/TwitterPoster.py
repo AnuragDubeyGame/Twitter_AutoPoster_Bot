@@ -6,6 +6,7 @@ import datetime
 import requests
 from dotenv import load_dotenv
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 
 
@@ -13,32 +14,31 @@ load_dotenv()
 EmailAdd = os.environ.get("Email")
 PassWord = os.environ.get("Pass")
 DBurl = "mongodb+srv://factboyuniverse:factboytestpass@factsdatabasecluster.ej0bjql.mongodb.net/"
-client = MongoClient(DBurl)
-db = client['FactsDB']
-collection = db['factsCollection']
-
-
 
 
 def PostTweet():
-    # FETCH FACTS
-    cursor = collection.find()
-    for document in cursor:
-        print(document)
+    dataToPost = RetrieveDataFromDB()
+    PostActualTweetOnTwitter(dataToPost["Facts"], dataToPost["ImageURL"])
 
-    PostDataToDB()
-    print("\t\t\t !!! Posting a Tweet !!!")
+def PostActualTweetOnTwitter(facts, imgurl):
+    print("POSTING TWEET : ",facts,imgurl)
 
-def PostDataToDB():
-   data = {
-        'name': 'John Doe',
-        'age': 30,
-        'email': 'john.doe@example.com'
-    }
-   result = collection.insert_one(data)
-   print('Inserted document ID:', result.inserted_id)
+def RetrieveDataFromDB():
+   print("\t\t Fetching Facts From DB... \t\t")
+   client = MongoClient(DBurl)
+   db = client['FactsDB']
+   collection = db['factsCollection']
+   cursor = collection.find()
+   first_document = cursor.next()
+
+   document_id = ObjectId(first_document["_id"])
+   result = collection.delete_one({'_id': document_id})
+   if result.deleted_count == 1:
+       print("Document deleted successfully : ",document_id)
+   else:
+       print("Document not found.")
    client.close()
-
+   return first_document
 
 
 def main():
