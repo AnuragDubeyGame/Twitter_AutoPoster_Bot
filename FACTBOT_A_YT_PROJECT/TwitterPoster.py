@@ -7,6 +7,8 @@ import requests
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from io import BytesIO
+from PIL import Image
 
 
 
@@ -21,7 +23,30 @@ def PostTweet():
     PostActualTweetOnTwitter(dataToPost["Facts"], dataToPost["ImageURL"])
 
 def PostActualTweetOnTwitter(facts, imgurl):
+    download_image(imgurl, r"C:\Users\Saurabh\OneDrive\Documents\GitHub\YT_SHORTS_CREATOR-main\YT_SHORTS_CREATOR-main\FACTBOT_A_YT_PROJECT\Img")
     print("POSTING TWEET : ",facts,imgurl)
+
+
+
+def download_image(url, file_path, file_format='PNG'):
+    response = requests.get(url)
+    response.raise_for_status()  # Check for any errors
+
+    # Open the image using PIL
+    image = Image.open(BytesIO(response.content))
+
+    # Save the image in the desired format
+    file_extension = file_format.lower()
+    if file_extension == 'jpg' or file_extension == 'jpeg':
+        file_path += '.jpg'  # Append the file extension if not provided
+        image.save(file_path, 'JPEG')
+    elif file_extension == 'png':
+        file_path += '.png'  # Append the file extension if not provided
+        image.save(file_path, 'PNG')
+    else:
+        raise ValueError("Unsupported file format. Please specify 'PNG' or 'JPG'.")
+
+
 
 def RetrieveDataFromDB():
    print("\t\t Fetching Facts From DB... \t\t")
