@@ -31,10 +31,13 @@ def PostActualTweetOnTwitter(facts, imgurl):
         access_token=os.environ.get("ACCESSTOKEN"),
         access_token_secret=os.environ.get("ACCESSSECRET")
         )
-    response = client.create_tweet(text='JUST TESTING, DONT SUE ME!')
-    print("RESPONSE : ",response)
+    auth = tp.OAuthHandler(os.environ.get("APIKEY"), os.environ.get("APISECRET"))
+    auth.set_access_token(os.environ.get("ACCESSTOKEN"), os.environ.get("ACCESSSECRET"))
 
-    print("POSTING TWEET : ",facts,imgurl)
+    api = tp.API(auth)
+    m = api.media_upload(r'C:\Users\Saurabh\OneDrive\Documents\GitHub\YT_SHORTS_CREATOR-main\YT_SHORTS_CREATOR-main\FACTBOT_A_YT_PROJECT\Img.png')
+    response = client.create_tweet(text=facts, media_ids=[m.media_id])
+    print("RESPONSE : ",response)
 
 def download_image(url, file_path, file_format='PNG'):
     response = requests.get(url)
