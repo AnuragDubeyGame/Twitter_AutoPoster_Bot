@@ -9,6 +9,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from io import BytesIO
 from PIL import Image
+import tweepy as tp
 
 
 
@@ -24,9 +25,16 @@ def PostTweet():
 
 def PostActualTweetOnTwitter(facts, imgurl):
     download_image(imgurl, r"C:\Users\Saurabh\OneDrive\Documents\GitHub\YT_SHORTS_CREATOR-main\YT_SHORTS_CREATOR-main\FACTBOT_A_YT_PROJECT\Img")
+    client = tp.Client(
+        consumer_key=os.environ.get("APIKEY"),
+        consumer_secret=os.environ.get("APISECRET"),
+        access_token=os.environ.get("ACCESSTOKEN"),
+        access_token_secret=os.environ.get("ACCESSSECRET")
+        )
+    response = client.create_tweet(text='JUST TESTING, DONT SUE ME!')
+    print("RESPONSE : ",response)
+
     print("POSTING TWEET : ",facts,imgurl)
-
-
 
 def download_image(url, file_path, file_format='PNG'):
     response = requests.get(url)
@@ -46,8 +54,6 @@ def download_image(url, file_path, file_format='PNG'):
     else:
         raise ValueError("Unsupported file format. Please specify 'PNG' or 'JPG'.")
 
-
-
 def RetrieveDataFromDB():
    print("\t\t Fetching Facts From DB... \t\t")
    client = MongoClient(DBurl)
@@ -65,15 +71,14 @@ def RetrieveDataFromDB():
    client.close()
    return first_document
 
-
 def main():
     # Set the start and end time for posting
     start_time = datetime.time(8, 0, 0)  # 8:00 AM
     end_time = datetime.time(23, 59, 0)  # 11:00 PM
 
     # Set the minimum and maximum duration between each post
-    min_duration = 1 * 60 # Minimum duration in mins
-    max_duration = 2 * 60 # Maximum duration in mins
+    min_duration = 10 * 1 # Minimum duration in mins
+    max_duration = 60 * 1 # Maximum duration in mins
 
     # Set the number of times to post in a day
     min_posts = 10  # Minimum number of posts
@@ -101,5 +106,4 @@ def main():
         print("\t\t TIME OVER! WE WILL START TOMORROW AGAIN!")
         sleep_time = datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=1), start_time) - datetime.datetime.now()
         time.sleep(sleep_time.total_seconds())
-
 main()
