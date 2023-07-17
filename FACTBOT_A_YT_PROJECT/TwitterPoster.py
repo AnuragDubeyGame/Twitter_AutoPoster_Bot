@@ -12,7 +12,6 @@ from PIL import Image
 import tweepy as tp
 
 load_dotenv()
-currentDataID = None
 EmailAdd = os.environ.get("Email")
 PassWord = os.environ.get("Pass")
 DBurl = "mongodb+srv://factboyuniverse:factboytestpass@factsdatabasecluster.ej0bjql.mongodb.net/"
@@ -21,7 +20,6 @@ DBurl = "mongodb+srv://factboyuniverse:factboytestpass@factsdatabasecluster.ej0b
 def PostTweet():
     dataToPost = RetrieveDataFromDB()
     PostActualTweetOnTwitter(dataToPost["Facts"], dataToPost["ImageURL"])
-    DeleteDataFromDB(currentDataID)
 
 def PostActualTweetOnTwitter(facts, imgurl):
     download_image(imgurl, r"C:\Users\Saurabh\OneDrive\Documents\GitHub\YT_SHORTS_CREATOR-main\YT_SHORTS_CREATOR-main\FACTBOT_TWITTER_PROJECT\Img")
@@ -48,21 +46,14 @@ def RetrieveDataFromDB():
    first_document = cursor.next()
 
    document_id = ObjectId(first_document["_id"])
-   currentDataID = document_id
+   result = collection.delete_one({'_id': document_id})
+   if result.deleted_count == 1:
+       print("Document deleted successfully : ",document_id)
+   else:
+       print("Document not found.")
    client.close()
    return first_document
-
-def DeleteDataFromDB(id):
-    client = MongoClient(DBurl)
-    db = client['FactsDB']
-    collection = db['factsCollection']
-
-    result = collection.delete_one({'_id': id})
-    if result.deleted_count == 1:
-       print("Document deleted successfully : ",id)
-    else:
-       print("Document not found.")
-    client.close()
+    
 
 def download_image(url, file_path, file_format='PNG'):
     response = requests.get(url)
@@ -88,8 +79,8 @@ def main():
     end_time = datetime.time(23, 59, 0)  # 11:00 PM
 
     # Set the minimum and maximum duration between each post
-    min_duration = 1 * 10 # Minimum duration in mins
-    max_duration = 2 * 10 # Maximum duration in mins
+    min_duration = 1 * 60 # Minimum duration in mins
+    max_duration = 2 * 60 # Maximum duration in mins
 
     # Set the number of times to post in a day
     min_posts = 10  # Minimum number of posts
@@ -117,4 +108,5 @@ def main():
         print("\t\t TIME OVER! WE WILL START TOMORROW AGAIN!")
         sleep_time = datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=1), start_time) - datetime.datetime.now()
         time.sleep(sleep_time.total_seconds())
+
 main()
