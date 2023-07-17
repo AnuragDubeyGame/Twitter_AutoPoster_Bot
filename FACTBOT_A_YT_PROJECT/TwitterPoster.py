@@ -11,9 +11,8 @@ from io import BytesIO
 from PIL import Image
 import tweepy as tp
 
-
-
 load_dotenv()
+currentDataID = None
 EmailAdd = os.environ.get("Email")
 PassWord = os.environ.get("Pass")
 DBurl = "mongodb+srv://factboyuniverse:factboytestpass@factsdatabasecluster.ej0bjql.mongodb.net/"
@@ -22,9 +21,10 @@ DBurl = "mongodb+srv://factboyuniverse:factboytestpass@factsdatabasecluster.ej0b
 def PostTweet():
     dataToPost = RetrieveDataFromDB()
     PostActualTweetOnTwitter(dataToPost["Facts"], dataToPost["ImageURL"])
+    DeleteDataFromDB(currentDataID)
 
 def PostActualTweetOnTwitter(facts, imgurl):
-    download_image(imgurl, r"C:\Users\Saurabh\OneDrive\Documents\GitHub\YT_SHORTS_CREATOR-main\YT_SHORTS_CREATOR-main\FACTBOT_A_YT_PROJECT\Img")
+    download_image(imgurl, r"C:\Users\Saurabh\OneDrive\Documents\GitHub\YT_SHORTS_CREATOR-main\YT_SHORTS_CREATOR-main\FACTBOT_TWITTER_PROJECT\Img")
     client = tp.Client(
         consumer_key=os.environ.get("APIKEY"),
         consumer_secret=os.environ.get("APISECRET"),
@@ -35,9 +35,34 @@ def PostActualTweetOnTwitter(facts, imgurl):
     auth.set_access_token(os.environ.get("ACCESSTOKEN"), os.environ.get("ACCESSSECRET"))
 
     api = tp.API(auth)
-    m = api.media_upload(r'C:\Users\Saurabh\OneDrive\Documents\GitHub\YT_SHORTS_CREATOR-main\YT_SHORTS_CREATOR-main\FACTBOT_A_YT_PROJECT\Img.png')
+    m = api.media_upload(r'C:\Users\Saurabh\OneDrive\Documents\GitHub\YT_SHORTS_CREATOR-main\YT_SHORTS_CREATOR-main\FACTBOT_TWITTER_PROJECT\Img.png')
     response = client.create_tweet(text=facts, media_ids=[m.media_id])
     print("RESPONSE : ",response)
+
+def RetrieveDataFromDB():
+   print("\t\t Fetching Facts From DB... \t\t")
+   client = MongoClient(DBurl)
+   db = client['FactsDB']
+   collection = db['factsCollection']
+   cursor = collection.find()
+   first_document = cursor.next()
+
+   document_id = ObjectId(first_document["_id"])
+   currentDataID = document_id
+   client.close()
+   return first_document
+
+def DeleteDataFromDB(id):
+    client = MongoClient(DBurl)
+    db = client['FactsDB']
+    collection = db['factsCollection']
+
+    result = collection.delete_one({'_id': id})
+    if result.deleted_count == 1:
+       print("Document deleted successfully : ",id)
+    else:
+       print("Document not found.")
+    client.close()
 
 def download_image(url, file_path, file_format='PNG'):
     response = requests.get(url)
@@ -57,31 +82,14 @@ def download_image(url, file_path, file_format='PNG'):
     else:
         raise ValueError("Unsupported file format. Please specify 'PNG' or 'JPG'.")
 
-def RetrieveDataFromDB():
-   print("\t\t Fetching Facts From DB... \t\t")
-   client = MongoClient(DBurl)
-   db = client['FactsDB']
-   collection = db['factsCollection']
-   cursor = collection.find()
-   first_document = cursor.next()
-
-   document_id = ObjectId(first_document["_id"])
-   result = collection.delete_one({'_id': document_id})
-   if result.deleted_count == 1:
-       print("Document deleted successfully : ",document_id)
-   else:
-       print("Document not found.")
-   client.close()
-   return first_document
-
 def main():
     # Set the start and end time for posting
     start_time = datetime.time(8, 0, 0)  # 8:00 AM
     end_time = datetime.time(23, 59, 0)  # 11:00 PM
 
     # Set the minimum and maximum duration between each post
-    min_duration = 10 * 1 # Minimum duration in mins
-    max_duration = 60 * 1 # Maximum duration in mins
+    min_duration = 1 * 10 # Minimum duration in mins
+    max_duration = 2 * 10 # Maximum duration in mins
 
     # Set the number of times to post in a day
     min_posts = 10  # Minimum number of posts
