@@ -14,7 +14,7 @@ import tweepy as tp
 load_dotenv()
 EmailAdd = os.environ.get("Email")
 PassWord = os.environ.get("Pass")
-DBurl = "mongodb+srv://factboyuniverse:factboytestpass@factsdatabasecluster.ej0bjql.mongodb.net/"
+DBurl = "mongodb+srv://factboyuniverse:<pass>@factsdatabasecluster.ej0bjql.mongodb.net/"
 
 
 def PostTweet():
