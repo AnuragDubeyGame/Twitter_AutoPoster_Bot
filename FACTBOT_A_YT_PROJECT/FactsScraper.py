@@ -11,7 +11,7 @@ data_dictionary = {}
 driver = webdriver.Chrome()
 wait = WebDriverWait(driver, 10)
 website_url = 'https://www.mentalfloss.com/amazingfactgenerator'
-DBurl = "mongodb+srv://factboyuniverse:factboytestpass@factsdatabasecluster.ej0bjql.mongodb.net/"
+DBurl = "mongodb+srv://factboyuniverse:<pass>@factsdatabasecluster.ej0bjql.mongodb.net/"
 
 
 def PostDataToDB(f,uri):
